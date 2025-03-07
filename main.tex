@@ -1,0 +1,228 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{hyperref}
+\usepackage{listings}
+
+\title{Stacks in Python: Concepts, Implementations, and Examples}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+A stack is a linear data structure that follows the LIFO (Last-In-First-Out) principle. This means that the last element added to the stack is the first one to be removed. Stacks are used in various applications, such as managing function calls, implementing Undo/Redo functionality, evaluating mathematical expressions, and recursive algorithms.
+
+In this article, we will explore the concepts of stacks, different implementation methods in Python, performance comparisons, and practical examples.
+
+\section{Main Stack Operations}
+
+A stack typically includes the following operations:
+
+\begin{itemize}
+    \item \textbf{Push}: Add an element to the top of the stack.
+    \item \textbf{Pop}: Remove and return the top element of the stack.
+    \item \textbf{Peek (Top)}: View the top element of the stack without removing it.
+    \item \textbf{isEmpty}: Check if the stack is empty.
+    \item \textbf{Size}: Return the number of elements in the stack.
+\end{itemize}
+
+\textbf{General Structure of a Stack:}
+
+\begin{verbatim}
+Stack:
+|  30  | ← Top of the stack
+|  20  |
+|  10  | ← First input element
+---------
+\end{verbatim}
+
+\section{Methods of Implementing a Stack in Python}
+
+\subsection{Using Python Lists}
+
+Python lists natively support stack operations. The \texttt{append()} method is used for Push and \texttt{pop()} for Pop.
+
+\textbf{Example:}
+
+\begin{lstlisting}[language=Python]
+stack = []
+stack.append(10)  # Push: [10]
+stack.append(20)  # Push: [10, 20]
+stack.append(30)  # Push: [10, 20, 30]
+
+print(stack.pop())  # Pop: 30 → Stack: [10, 20]
+print(stack[-1])    # Peek: 20
+print(len(stack))   # Size: 2
+\end{lstlisting}
+
+\textbf{Advantages and Limitations:}
+
+\begin{itemize}
+    \item \textbf{Simplicity}: No need for additional libraries.
+    \item \textbf{High performance}: \texttt{append()} and \texttt{pop()} operations at the end of the list are O(1).
+    \item \textbf{Low performance in pop(0)}: If the first element of the list is removed, the operation becomes O(n).
+\end{itemize}
+
+\subsection{Using \texttt{collections.deque}}
+
+The \texttt{collections} module provides a deque (double-ended queue) data structure, which is more efficient for implementing stacks.
+
+\textbf{Example:}
+
+\begin{lstlisting}[language=Python]
+from collections import deque
+
+stack = deque()
+stack.append(10)  # Push
+stack.append(20)  # Push
+stack.append(30)  # Push
+
+print(stack.pop())  # Pop: 30
+print(stack[-1])    # Peek: 20
+print(len(stack))   # Size: 2
+\end{lstlisting}
+
+\textbf{Advantages:}
+
+\begin{itemize}
+    \item \textbf{Better performance}: All operations are O(1).
+    \item \textbf{More stable} than Python lists for processing large data.
+\end{itemize}
+
+\subsection{Using \texttt{queue.LifoQueue} (Thread-Safe Stack)}
+
+The \texttt{queue} module provides the \texttt{LifoQueue} class, which is suitable for multi-threaded (thread-safe) programs.
+
+\textbf{Example:}
+
+\begin{lstlisting}[language=Python]
+from queue import LifoQueue
+
+stack = LifoQueue()
+stack.put(10)
+stack.put(20)
+print(stack.get())  # Output: 20
+\end{lstlisting}
+
+\textbf{Advantages:}
+
+\begin{itemize}
+    \item \textbf{Thread safety}.
+    \item \textbf{More complexity} compared to deque and lists.
+\end{itemize}
+
+\subsection{Implementing a Stack with a Custom Class}
+
+To have more control over stack operations, a custom class can be implemented.
+
+\textbf{Example:}
+
+\begin{lstlisting}[language=Python]
+class Stack:
+    def __init__(self):
+        self.items = []
+    
+    def push(self, item):
+        self.items.append(item)
+    
+    def pop(self):
+        if not self.is_empty():
+            return self.items.pop()
+        raise IndexError("Stack is empty!")
+    
+    def peek(self):
+        if not self.is_empty():
+            return self.items[-1]
+        raise IndexError("Stack is empty!")
+    
+    def is_empty(self):
+        return len(self.items) == 0
+    
+    def size(self):
+        return len(self.items)
+
+# Using the class
+s = Stack()
+s.push(100)
+s.push(200)
+print(s.pop())  # Output: 200
+print(s.peek())  # Output: 100
+\end{lstlisting}
+
+\textbf{Advantages:}
+
+\begin{itemize}
+    \item \textbf{Extensibility}: Ability to add new methods like search.
+    \item \textbf{Better encapsulation}.
+    \item \textbf{More complexity} compared to previous methods.
+\end{itemize}
+
+\section{Real-World Applications of Stacks}
+
+\subsection{Checking Parentheses Balance in Mathematical Expressions}
+
+Stacks are used to check the balance of parentheses in mathematical expressions.
+
+\textbf{Example:}
+
+\begin{lstlisting}[language=Python]
+def is_balanced(expression):
+    stack = []
+    pairs = {')': '(', ']': '[', '}': '{'}
+    for char in expression:
+        if char in '([{':
+            stack.append(char)
+        elif char in ')]}':
+            if not stack or stack.pop() != pairs[char]:
+                return False
+    return not stack
+
+print(is_balanced("{[()]}"))  # True
+print(is_balanced("{[(])}"))  # False
+\end{lstlisting}
+
+\subsection{Implementing Undo/Redo Functionality}
+
+Two stacks can be used to manage Undo and Redo actions.
+
+\textbf{Example:}
+
+\begin{lstlisting}[language=Python]
+undo_stack = []
+redo_stack = []
+
+def do_action(action):
+    undo_stack.append(action)
+
+def undo():
+    if undo_stack:
+        action = undo_stack.pop()
+        redo_stack.append(action)
+
+def redo():
+    if redo_stack:
+        action = redo_stack.pop()
+        undo_stack.append(action)
+\end{lstlisting}
+
+\section{Comparing Stack Implementation Methods in Python}
+
+\section{Conclusion}
+
+Stacks are fundamental data structures used in various tasks like function management, recursive algorithms, text processing, and controlling Undo/Redo operations. In Python, depending on the project requirements, you can implement stacks using lists, deque, LifoQueue, or a custom class.
+
+The best method depends on your needs:
+
+\begin{itemize}
+    \item If you need simplicity, use lists.
+    \item If you have large data, deque is more suitable.
+    \item If you want thread-safety, choose LifoQueue.
+    \item If you need high flexibility, build a custom class.
+\end{itemize}
+
+\end{document}
+
